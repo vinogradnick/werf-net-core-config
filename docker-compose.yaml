@@ -1,0 +1,34 @@
+version: '2'
+services:
+  postgres-db:
+    restart: always
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DATABASE: realtime
+    expose:
+      - 5432
+    ports:
+      - "5432:5432"
+  backend:
+    restart: always
+    build:
+      context: ./realtime-tournament-backend-node-nest
+      dockerfile: Dockerfile
+    command: yarn && yarn typeorm migration:run && yarn start
+    ports:
+      - "4000:4000"
+    volumes:
+      - "./dev/realtime-tournament-backend-node-nest:/realtime-tournament-backend-node-nest"
+    depends_on:
+      - postgres-db
+  frontend:
+    restart: always
+    build:
+      context: ./realtime-tournament-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "1488:1488"
+    volumes:
+      - "./dev/realtime-tournament-frontend:/realtime-tournament-frontend"
